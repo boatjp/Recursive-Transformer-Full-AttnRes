@@ -1,0 +1,186 @@
+{
+  "status": "completed",
+  "config": {
+    "output_dir": "C:\\Users\\tobin\\OneDrive\\Desktop\\deep leaning\\output-full",
+    "mode": "full",
+    "target_train_words": 10000000,
+    "vocab_size": 16384,
+    "seed": 20251031,
+    "shuffle_buffer_size": 20000,
+    "min_document_words": 50,
+    "low_frequency_threshold": 5,
+    "character_coverage": 0.9995,
+    "normalization_rule_name": "nmt_nfkc",
+    "byte_fallback": true,
+    "dataset": "HuggingFaceFW/finewiki",
+    "dataset_config": "ja",
+    "dataset_split": "train",
+    "split_mode": "SudachiPy SplitMode.C",
+    "split_ratios": {
+      "train": 0.9,
+      "validation": 0.05,
+      "test": 0.05
+    }
+  },
+  "counting_method": "SudachiPy dictionary.Dictionary().create(), Tokenizer.SplitMode.C; sum of morphemes per accepted document",
+  "splits": {
+    "train": {
+      "documents": 9129,
+      "sudachi_words": 10009725
+    },
+    "validation": {
+      "documents": 507,
+      "sudachi_words": 549993
+    },
+    "test": {
+      "documents": 483,
+      "sudachi_words": 552906
+    }
+  },
+  "rejected_documents": {
+    "too_short": 63
+  },
+  "token_counts": {
+    "train": 7898067,
+    "validation": 420061,
+    "test": 423619
+  },
+  "average_tokens_per_train_word": 0.7890393592231555,
+  "vocabulary": {
+    "size": 16384,
+    "used_on_train": 16229,
+    "usage_rate": 0.99053955078125,
+    "unused_on_train": 155,
+    "low_frequency_threshold": 5,
+    "low_frequency_tokens_on_train": 32
+  },
+  "roundtrip": {
+    "tested": 20,
+    "exact_matches": 13,
+    "token_id_stable": 20,
+    "note": "nmt_nfkc正規化と空白処理のため、raw textの完全一致は必須ではありません。token_id_stableも併記します。",
+    "cases": [
+      {
+        "input": "作詞：竜真知子　作曲：国安わたる　編曲：渡辺博也",
+        "decoded": "作詞:竜真知子 作曲:国安わたる 編曲:渡辺博也",
+        "exact_match": false,
+        "token_ids_stable": true
+      },
+      {
+        "input": "- ロバート・モンゴメリー - 『幽霊紐育を歩く』、『天国の怒り』",
+        "decoded": "- ロバート・モンゴメリー - 『幽霊紐育を歩く』、『天国の怒り』",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "令和の際には崩御を伴わない皇位継承であったことから、天皇が即位した2019年（令和元年）5月1日から3日後の4日に行われ、天皇・皇族は7回出御した。なお、この時譲位により上皇となった明仁と上皇后となった美智子は出御しなかった。",
+        "decoded": "令和の際には崩御を伴わない皇位継承であったことから、天皇が即位した2019年(令和元年)5月1日から3日後の4日に行われ、天皇・皇族は7回出御した。なお、この時譲位により上皇となった明仁と上皇后となった美智子は出御しなかった。",
+        "exact_match": false,
+        "token_ids_stable": true
+      },
+      {
+        "input": "|  |                                  |",
+        "decoded": "| | |",
+        "exact_match": false,
+        "token_ids_stable": true
+      },
+      {
+        "input": "## 島",
+        "decoded": "## 島",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "# イメージ戦略",
+        "decoded": "# イメージ戦略",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "2017年7月、FCスタル・カーミヤンシケに期限付き移籍。2017年12月、スタル・カーミヤンシケとの契約を解除し、今度はゾリャ・ルハーンシクに期限付き移籍。",
+        "decoded": "2017年7月、FCスタル・カーミヤンシケに期限付き移籍。2017年12月、スタル・カーミヤンシケとの契約を解除し、今度はゾリャ・ルハーンシクに期限付き移籍。",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "### 道路",
+        "decoded": "### 道路",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "| 1973年   | スティグ・ブロンクビスト | アーネ・ヘルツ           | サーブ・96V4                      |",
+        "decoded": "| 1973年 | スティグ・ブロンクビスト | アーネ・ヘルツ | サーブ・96V4 |",
+        "exact_match": false,
+        "token_ids_stable": true
+      },
+      {
+        "input": "- 5月15日（1868年7月4日） 上野戦争。彰義隊、一日で壊滅",
+        "decoded": "- 5月15日(1868年7月4日) 上野戦争。彰義隊、一日で壊滅",
+        "exact_match": false,
+        "token_ids_stable": true
+      },
+      {
+        "input": "発展途上国と外国投資家との投資紛争を仲裁するための機関である。",
+        "decoded": "発展途上国と外国投資家との投資紛争を仲裁するための機関である。",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "■焼酎",
+        "decoded": "■焼酎",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "- 魔界戦記ディスガイア3（2008年1月31日） - キャラクターデザイン",
+        "decoded": "- 魔界戦記ディスガイア3(2008年1月31日) - キャラクターデザイン",
+        "exact_match": false,
+        "token_ids_stable": true
+      },
+      {
+        "input": "ビミアンソはコルクビョン司法管轄区に属す",
+        "decoded": "ビミアンソはコルクビョン司法管轄区に属す",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "- 第四集 祸从天降",
+        "decoded": "- 第四集 祸从天降",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "|  |                                  |",
+        "decoded": "| | |",
+        "exact_match": false,
+        "token_ids_stable": true
+      },
+      {
+        "input": "ゴーとミヨによれば、ヌーベルキュジーヌには次の10の形式に則っていることが多い。",
+        "decoded": "ゴーとミヨによれば、ヌーベルキュジーヌには次の10の形式に則っていることが多い。",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "家庭事情により中学卒業後にすぐ就職した、野球センス抜群の真面目なチームメイト。唯一の欠点は兄が変人であること。実家が破産し、父親が死んだため今は兄と2人で暮らしている。",
+        "decoded": "家庭事情により中学卒業後にすぐ就職した、野球センス抜群の真面目なチームメイト。唯一の欠点は兄が変人であること。実家が破産し、父親が死んだため今は兄と2人で暮らしている。",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "2000年に再結成。",
+        "decoded": "2000年に再結成。",
+        "exact_match": true,
+        "token_ids_stable": true
+      },
+      {
+        "input": "## 概要",
+        "decoded": "## 概要",
+        "exact_match": true,
+        "token_ids_stable": true
+      }
+    ]
+  },
+  "elapsed_seconds": 317.1048219203949
+}

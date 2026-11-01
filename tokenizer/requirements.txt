@@ -1,0 +1,4 @@
+datasets==4.4.1
+sentencepiece==0.2.1
+SudachiPy==0.6.10
+SudachiDict-core==20251022
