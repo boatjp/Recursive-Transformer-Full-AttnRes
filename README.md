@@ -1,6 +1,31 @@
 # Recursive Transformer + Full AttnRes
 
-日本語Causal Language Modelのモデル本体とユニットテストです。学習ループ・データセット処理・事前学習は含みません。既存Tokenizerの作成手順は `tokenizer/README.md` を参照してください。
+日本語Causal Language Modelのモデル本体、データローダー、ユニットテストです。学習ループと事前学習は含みません。既存Tokenizerの作成手順は `tokenizer/README.md` を参照してください。
+
+## データローダー
+
+`data.py` は既存の `tokenizer/output-full/{train,validation,test}.txt` と `tokenizer.model` を使用し、各splitを独立した連続トークンストリームとしてキャッシュします。初回はUTF-8テキストを行単位で読み、空行・空白だけの行を除外します。各行末の改行を取り除いてからSentencePiece `encode` に渡し、32-bit整数の `.tokens` と設定・ファイル情報を含む `.json` を `tokenizer/output-full/token_cache/` に保存します。2回目以降はファイルのパス・サイズ・更新時刻とトークン化設定を照合してキャッシュを再利用します。元テキストは変更しません。トークン化方式の変更を示すキャッシュ版数も照合するため、旧チャンク方式のキャッシュは再生成されます。
+
+```python
+from data import DataConfig, create_dataloaders, dataset_statistics
+from recursive_transformer import ModelConfig, RecursiveTransformerLM
+
+config = DataConfig(sequence_length=256, seed=42)
+loaders = create_dataloaders(config, batch_size=16, num_workers=2, pin_memory=True)
+print(dataset_statistics(config))
+model_config = ModelConfig.from_tokenizer(config.data_dir / "tokenizer.model", residual_type="attnres")
+model = RecursiveTransformerLM(model_config)
+batch = next(iter(loaders["train"]))
+result = model(**batch)
+```
+
+`DataConfig` では `data_dir`、`cache_dir`、`sequence_length`、`seed`、`add_bos`、`add_eos` を設定できます。`create_dataloaders` は `train`・`validation`・`test` のDataLoaderを返します。Trainは固定長ブロック単位のseed付きシャッフルと `drop_last=True` が既定で、`train_shuffle`・`train_drop_last` で変更できます。Validation/Testは順序固定で末尾バッチを残します。全splitで固定長にならない余剰トークンを破棄し、`input_ids` と同一の `labels`、全1の `attention_mask` を返します。固定長系列は1行内で完結し、ブロック間の次トークン予測は計算しません。
+
+元TXTの空行は文書境界とみなさず、EOSは自動挿入しません。`add_bos`・`add_eos` を指定した場合も、ストリーム全体の先頭・末尾に各1個だけ追加します。行末の改行はトークン化しないため、行間の改行トークンも入りません。これは既存の `tokenizer_pipeline.py` が統計集計時に使う `iter_nonempty_lines` と同じ方式です。元のテキストは変更しませんが、Tokenizerの `nmt_nfkc` 正規化・空白処理により、行内の空白も原文どおりに復元できるとは限りません。行をまたぐトークンは作らず、長いデータを一括してメモリに載せずに処理します。ただし、非常に長い単一行はその行の読み込み中にメモリを使います。キャッシュはメモリマップで読み、固定長ブロックは1回の一括読み込みで取得します。
+
+キャッシュはサイズ・ナノ秒更新時刻を使って元TXTとTokenizerの変更を検出し、トークン化方式・BOS/EOS設定の変更も検出します。同じサイズ・更新時刻を人為的に維持した変更は検出できません。`dataset_statistics` は語彙数、splitごとのトークン数・サンプル数・余剰数・キャッシュパス、系列長、seedを返します。データ用テストは小さな人工TXTを使用します。
+
+行単位方式へ変更後、実データのTrain・Validation・Testキャッシュを再生成し、既存の `tokenizer_stats.json` とトークン数が完全一致することを確認しました。順に7,898,067、420,061、423,619トークンです。
 
 ## セットアップと検証
 
@@ -71,7 +96,7 @@ input[b,t] = sum_d(weights[b,t,d] * history[b,t,d])
 
 Embedding・Linearは平均0、標準偏差0.02の正規分布、Padding行は0、Norm scaleは1、Norm biasとAttnRes Queryは0です。Attention OとFFN downの標準偏差は `0.02 / sqrt(2 * num_steps)` に縮小します。ベース論文Appendix BのO/downゼロ初期化とは異なります。両比較モデルで同じ初期化方式を使い、最初のBackwardから内部projectionへの勾配経路を検証します。`set_seed` はPythonとPyTorchのCPU/CUDA seedを設定しますが、異なるデバイス・PyTorch版間のビット単位一致を保証するものではありません。
 
-ベース論文の英語BPE（32,768語彙）を既存の日本語SentencePiece（16,384語彙）へ置換し、FlashAttentionの可変長packed処理を通常のSDPA＋Padding/Causalマスクへ置換しています。Recursive共有ブロックとAttnResの組み合わせ、パラメータなしのAttnRes Key Normは今回の比較設計です。`task.md` の当初の32 Query指定に対しては、最終Readout用に1個を追加する設計へ変更しています。
+ベース論文の英語BPE（32,768語彙）を既存の日本語SentencePiece（16,384語彙）へ置換し、FlashAttentionの可変長packed処理を通常のSDPA＋Padding/Causalマスクへ置換しています。Recursive共有ブロックとAttnResの組み合わせ、パラメータなしのAttnRes Key Normは今回の比較設計です。当初の32 Query指定に対しては、最終Readout用に1個を追加する設計へ変更しています。
 
 ## 正確なパラメータ数
 

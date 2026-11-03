@@ -1,3 +1,5 @@
 __pycache__/
 *.py[cod]
 .venv/
+local-notes/
+tokenizer/output-full/token_cache/
