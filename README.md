@@ -27,6 +27,21 @@ result = model(**batch)
 
 行単位方式へ変更後、実データのTrain・Validation・Testキャッシュを再生成し、既存の `tokenizer_stats.json` とトークン数が完全一致することを確認しました。順に7,898,067、420,061、423,619トークンです。
 
+## 学習環境
+
+`train.py` は `configs/train.json` を読み、AdamW、更新単位のLinear Warmup＋Cosine Decay、トークン数で重み付けした勾配蓄積、Global Norm Clipping、Validation、JSONLログ、`last.pt`・`best.pt` を提供します。既定設定は系列長512、micro batch 4、8回蓄積、10 epoch、seed 42、学習率3e-4、bf16です。対応CUDA GPUがない場合はfp32へ切り替わります。bf16はGradScalerを使いません。Test splitは学習中のモデル選択に使いません。`tokens_per_second` は各Optimizer更新の学習処理のみを計測し、Validation・Checkpoint保存時間は含みません。CUDAでは更新前後に同期し、各更新前にPeakメモリ統計をリセットして `gpu_peak_memory_bytes` を記録します。CPUではこの値は0です。
+
+本番学習を実行する際は、設定値・利用可能メモリ・出力先を確認してから、以下のコマンドを使います。今回の作業では実行していません。
+
+```powershell
+.venv\Scripts\python.exe train.py --config configs/train.json
+.venv\Scripts\python.exe train.py --config configs/train.json --resume runs/recursive-ja-residual/last.pt
+```
+
+AttnResの比較実験には設定ファイルをコピーし、`residual_type` を `"attnres"`、`experiment_name` と `output_dir` を別名に変更します。その他の条件は揃えます。再開時は同じ設定ファイルと同じデータキャッシュを使います。Checkpointにはモデル・Optimizer・Scheduler・epoch・更新数・次のバッチ位置・乱数状態・データ識別情報を保存します。更新境界で一時ファイルから置換するため、途中再開時はepoch内のシャッフル順も再現できます。Checkpointは信頼できる自分のファイルだけを読み込んでください。
+
+`tests/test_train.py` は小型モデルと人工データで学習、検証、再開後のパラメータ・学習率一致を確認します。実際の`data.py`を通す1更新も小さな人工TXTで確認します。本番の10M語学習は行いません。
+
 ## セットアップと検証
 
 Python 3.13、PyTorch 2.15.0+cpu、SentencePiece 0.2.1で検証済みです。

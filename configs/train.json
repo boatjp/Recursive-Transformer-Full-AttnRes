@@ -1,0 +1,23 @@
+{
+  "experiment_name": "recursive-ja-residual",
+  "residual_type": "residual",
+  "data_dir": "tokenizer/output-full",
+  "output_dir": "runs/recursive-ja-residual",
+  "sequence_length": 512,
+  "micro_batch_size": 4,
+  "gradient_accumulation_steps": 8,
+  "max_epochs": 10,
+  "seed": 42,
+  "precision": "bf16",
+  "learning_rate": 0.0003,
+  "betas": [0.9, 0.95],
+  "eps": 1e-8,
+  "weight_decay": 0.1,
+  "max_grad_norm": 1.0,
+  "warmup_fraction": 0.05,
+  "min_lr_fraction": 0.1,
+  "validation_interval": 200,
+  "checkpoint_interval": 500,
+  "num_workers": 0,
+  "pin_memory": false
+}
