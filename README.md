@@ -1,6 +1,6 @@
 # Recursive Transformer + Full AttnRes
 
-日本語Causal Language Modelのモデル本体、データローダー、ユニットテストです。学習ループと事前学習は含みません。既存Tokenizerの作成手順は `tokenizer/README.md` を参照してください。
+日本語Causal Language Modelの通常Residual版とFull AttnRes版を比較するためのPyTorch実装です。モデル、データローダー、学習、評価、テキスト生成と各ユニットテストを含みます。本番の事前学習はまだ実行していません。既存Tokenizerの作成手順は `tokenizer/README.md` を参照してください。
 
 ## データローダー
 
