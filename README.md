@@ -42,6 +42,20 @@ AttnResの比較実験には設定ファイルをコピーし、`residual_type` 
 
 `tests/test_train.py` は小型モデルと人工データで学習、検証、再開後のパラメータ・学習率一致を確認します。実際の`data.py`を通す1更新も小さな人工TXTで確認します。本番の10M語学習は行いません。
 
+## Checkpoint評価と生成
+
+学習済みCheckpointがある場合、`evaluate.py` は保存されたモデル設定とTokenizer・Testデータの識別情報を照合し、`train.py` の評価関数でTestのCross-Entropy LossとPerplexityを計算します。結果はコンソールとJSONへ出力します。既定のCheckpointは `runs/recursive-ja-residual/best.pt`、既定のJSON保存先はCheckpointと同じフォルダの `test_evaluation.json` です。Testは学習中のモデル選択に使用しません。
+
+```powershell
+.venv\Scripts\python.exe evaluate.py --checkpoint runs/recursive-ja-residual/best.pt --batch-size 4 --output runs/recursive-ja-residual/test_evaluation.json
+.venv\Scripts\python.exe generate.py --checkpoint runs/recursive-ja-residual/best.pt --prompt "日本語の文章" --max-new-tokens 256 --seed 42
+.venv\Scripts\python.exe generate.py --checkpoint runs/recursive-ja-residual/best.pt --prompt "日本語の文章" --greedy --no-cache
+```
+
+`generate.py` は保存された設定で両Residual方式を復元し、SentencePieceでプロンプトをエンコード・結果をデコードします。既定ではSamplingを使い、Temperature 0.8、Top-k 50、Top-p 0.95、Repetition penalty 1.0です。各値は同名のCLIオプションで変更でき、`--greedy` で決定的な最大logit選択に切り替えます。EOSが出たら停止します。生成中は全トークンを保持し、512トークンで自動切り捨てしません。ただし学習時の系列長を超えた出力品質は保証されず、長い文脈では計算量・メモリ使用量が増えます。
+
+KV CacheはOFFです。`--use-cache` は再帰ステップ間のKVを混同しない正確な実装が未完成のため、明確な未対応エラーを返します。`--no-cache` は明示的なOFF指定です。生成・評価ともに信頼できるCheckpointだけを読み込んでください。`tests/test_inference.py` は小型モデルと人工データでCheckpoint復元、両方式の評価・生成、Sampling、EOS、長い文脈、CLIを検証します。本番学習や本番Checkpointの評価は今回実行していません。
+
 ## セットアップと検証
 
 Python 3.13、PyTorch 2.15.0+cpu、SentencePiece 0.2.1で検証済みです。
